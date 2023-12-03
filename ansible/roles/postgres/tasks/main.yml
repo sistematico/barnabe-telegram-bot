@@ -1,0 +1,30 @@
+---
+- name: Instalar o repositório do PostgreSQL
+  ansible.builtin.dnf:
+    name: https://download.postgresql.org/pub/repos/yum/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+    state: present
+
+- name: Desabilitar o módulo padrão do PostgreSQL
+  ansible.builtin.dnf:
+    name: postgresql
+    state: disabled
+    module_hotfixes: true
+
+- name: Instalar o PostgreSQL 15
+  ansible.builtin.dnf:
+    name: postgresql15-server
+    state: present
+
+- name: Inicializar o banco de dados do PostgreSQL
+  ansible.builtin.command:
+    cmd: /usr/pgsql-15/bin/postgresql-15-setup initdb
+  args:
+    creates: 
+      - /var/lib/pgsql/15/data/postgresql.conf
+      - /var/lib/pgsql/15/data/pg_hba.conf
+
+- name: Ativar e iniciar o serviço do PostgreSQL
+  ansible.builtin.systemd:
+    name: postgresql-15.service
+    enabled: true
+    state: started

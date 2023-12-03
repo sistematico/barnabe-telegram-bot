@@ -1,0 +1,47 @@
+---
+- name: Instalar o repositório EPEL
+  yum:
+    name: epel-release
+    state: present
+  when: ansible_os_family == "RedHat"
+
+- name: "Instalar Certbot e plugin Cloudflare"
+  ansible.builtin.package:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - certbot
+    - python3-certbot-dns-cloudflare
+
+- name: "Copiar credenciais do Cloudflare"
+  ansible.builtin.template:
+    src: cloudflare.ini.j2
+    dest: /etc/cloudflare.ini
+    mode: '0600'
+
+- name: Obter certificado SSL
+  ansible.legacy.shell: |
+    certbot certonly --agree-tos -m sistematico@gmail.com --dns-cloudflare --dns-cloudflare-credentials /etc/cloudflare.ini -d "{{ bot_host }}"
+  args:
+    creates: /etc/letsencrypt/live/{{ bot_host }}
+
+- name: Configurar renovação automática do certificado
+  ansible.builtin.copy:
+    content: |
+      [Unit]
+      Description=Renewal of Let's Encrypt's certificates
+
+      [Timer]
+      OnCalendar=daily
+      RandomizedDelaySec=1h
+
+      [Install]
+      WantedBy=timers.target
+    dest: /etc/systemd/system/certbot-renew.timer
+    mode: '0644'
+
+- name: Habilitar e iniciar timer de renovação do certificado
+  ansible.builtin.systemd:
+    name: certbot-renew.timer
+    state: started
+    enabled: true
