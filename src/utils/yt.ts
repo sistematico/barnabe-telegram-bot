@@ -18,27 +18,22 @@ export async function downloadVideo(url: string): Promise<string | null> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = []
 
-    readableStream.on('data', (chunk) => {
-      chunks.push(chunk)
-    })
-
+    readableStream.on('data', (chunk) => chunks.push(chunk))
     readableStream.on('end', () => {
       Bun.write(filename, Buffer.concat(chunks)).then(() => {
-        console.log('Download concluído.');
-        resolve(filename);
+        resolve(filename) // Download concluído.
       }).catch((err) => {
-        console.error('Erro ao salvar o vídeo:', err);
-        reject(null);
-      });
-    });
+        console.error('Erro ao salvar o vídeo:', err)
+        reject(null)
+      })
+    })
 
     readableStream.on('error', (err) => {
-      console.error('Erro ao baixar o vídeo:', err);
-      reject(null);
-    });
-  });
+      console.error('Erro ao baixar o vídeo:', err)
+      reject(null)
+    })
+  })
 }
-
 
 function validDomain(url: string): boolean {
   try {

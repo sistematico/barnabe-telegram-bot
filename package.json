@@ -3,8 +3,8 @@
   "module": "src/bot.ts",
   "type": "module",
   "scripts": {
-    "start": "NODE_ENV=production bun src/bot.ts",
-    "prod": "NODE_ENV=production bun src/bot.ts",
+    "start": "NODE_ENV=production /home/rocky/.bun/bin/bun src/bot.ts",
+    "prod": "NODE_ENV=production /home/rocky/.bun/bin/bun src/bot.ts",
     "dev": "NODE_ENV=development bun --watch run src/bot.ts"
   },
   "devDependencies": {
