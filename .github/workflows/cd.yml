@@ -12,7 +12,7 @@ jobs:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USER }}
         password: ${{ secrets.SSH_PASS }}
-        port: 22
+        port: ${{ secrets.SSH_PORT }}
         source: "."
         target: ${{ secrets.WORK_DIR }}
 
@@ -27,11 +27,10 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.SSH_PASS }}
-          port: 22
+          port: ${{ secrets.SSH_PORT }}
           script: |
             cd ${{ secrets.WORK_DIR }}
             [ ! -f .env ] && cp .env.production .env
-            bash scripts/deploy.sh            
-            bash scripts/db/reset.sh  
-            sudo /usr/bin/systemctl restart barnabe.service          
+            bash deploy.sh
+            sudo /usr/bin/systemctl restart barnabe.service
 

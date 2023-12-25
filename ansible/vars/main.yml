@@ -3,5 +3,5 @@ main_host: paxa.dev
 bot_name: barnabe
 bot_host: barna.paxa.dev
 bot_user: rocky
-bot_port: 3003
+bot_port: 3008
 service_name: barnabe.service
