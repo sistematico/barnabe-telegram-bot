@@ -50,8 +50,8 @@ bot.chatType("private").on("message:entities:url", async (ctx) => {
 });
 
 if (Bun.env.NODE_ENV === "production") {
-  const webhookUrl = Bun.env.BOT_URL
-  if (!webhookUrl) throw new Error('BOT_URL is required for production mode');
+  const webhookUrl = Bun.env.BOT_WEBHOOK_URL
+  if (!webhookUrl) throw new Error('BOT_WEBHOOK_URL is required for production mode');
 
   bot.api.setWebhook(webhookUrl);
   app.use(webhookCallback(bot, "hono"));
