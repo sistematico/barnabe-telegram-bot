@@ -1,9 +1,13 @@
 import { Hono } from 'hono'
 import { webhookCallback, InputFile } from 'grammy'
-import { bot, downloadVideo, validateUrl, sendLogToChannel } from '@/utils'
+import { bot, validateUrl, downloadVideo, sendLogToChannel } from '@/utils'
+import { floodControlPlugin } from '@/mw/flood'
+import { unlinkSync } from 'node:fs'
 
 const app = new Hono()
 const port = Bun.env.BOT_PORT || 3008
+
+bot.use(floodControlPlugin())
 
 bot.on('message:entities:url', async ctx => {
   const message = ctx.message.text
@@ -11,9 +15,12 @@ bot.on('message:entities:url', async ctx => {
   
   if (url) {
     const file = await downloadVideo(url)
-    console.log(file)
-    if (file) await ctx.replyWithVideo(new InputFile(file))
-    else await ctx.reply('Houve um erro.')
+    if (file) {
+      await ctx.replyWithVideo(new InputFile(file))
+      unlinkSync(file)
+    } else {
+      await ctx.reply('Houve um erro.')
+    }
   }
 })
 

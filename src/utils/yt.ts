@@ -14,7 +14,7 @@ export async function downloadVideo(url: string): Promise<string | null> {
     if (!metadata.title) return null
 
     const filename = metadata.title + '.mp4'
-    const readableStream = ytDlpWrap.execStream([url, '-f', 'best[ext=mp4]'])
+    const readableStream = ytDlpWrap.execStream([url, '-c', '--no-part', '-f', 'best[ext=mp4]'])
 
     const chunks: Buffer[] = []
     return new Promise((resolve, reject) => {
