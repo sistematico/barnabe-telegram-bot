@@ -23,7 +23,7 @@ async function downloadVideo(url: string) {
   const safeTitle = title.replace(/[^a-zA-Z0-9]/g, '_'); // Remove caracteres especiais
   
   const downloadPath = `${safeTitle}.mp4`;
-  await ytdlp.exec([url, '-f', 'best[ext=mp4]', '-o', downloadPath]);
+  await ytdlp.exec([url, '-c', '--no-part', '-f', 'best[ext=mp4]', '-o', downloadPath]);
   
   return downloadPath;
 }
@@ -50,6 +50,10 @@ bot.chatType("private").on("message:entities:url", async (ctx) => {
 });
 
 if (Bun.env.NODE_ENV === "production") {
+  const webhookUrl = Bun.env.BOT_URL
+  if (!webhookUrl) throw new Error('BOT_URL is required for production mode');
+
+  bot.api.setWebhook(webhookUrl);
   app.use(webhookCallback(bot, "hono"));
 } else {
   bot.catch((err) => {
