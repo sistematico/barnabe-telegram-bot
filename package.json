@@ -2,23 +2,10 @@
   "name": "barnabe-telegram-bot",
   "module": "src/bot.ts",
   "type": "module",
-  "scripts": {
-    "start": "NODE_ENV=production /home/rocky/.bun/bin/bun src/bot.ts",
-    "prod": "NODE_ENV=production /home/rocky/.bun/bin/bun src/bot.ts",
-    "dev": "NODE_ENV=development bun --watch run src/bot.ts"
-  },
   "devDependencies": {
-    "bun-types": "latest",
-    "typescript": "^5.3.2"
+    "@types/bun": "latest"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
-  },
-  "dependencies": {
-    "@grammyjs/auto-retry": "^1.1.1",
-    "@grammyjs/transformer-throttler": "^1.2.1",
-    "grammy": "^1.19.2",
-    "hono": "latest",
-    "yt-dlp-wrap": "^2.3.12"
   }
 }
