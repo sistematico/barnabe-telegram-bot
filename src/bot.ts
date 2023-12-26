@@ -43,6 +43,8 @@ bot.chatType("private").on("message:entities:url", async (ctx) => {
     await ctx.replyWithVideo(video);
 
     await unlink(downloadPath);
+
+    return;
   } catch (error) {
     console.error(error);
     ctx.reply("Houve um erro ao baixar o vídeo.");
