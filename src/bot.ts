@@ -7,7 +7,7 @@ import { unlinkSync } from 'node:fs'
 const app = new Hono()
 const port = Bun.env.BOT_PORT || 3008
 
-bot.use(floodControlPlugin())
+bot.use(floodControlPlugin)
 
 bot.on('message:entities:url', async ctx => {
   const message = ctx.message.text
