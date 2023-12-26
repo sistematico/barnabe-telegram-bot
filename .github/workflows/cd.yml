@@ -1,0 +1,36 @@
+name: SSH Deploy
+on: [push]
+jobs:
+  deploy:
+    name: Deploy on VPS
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Copy file via ssh password
+      uses: appleboy/scp-action@v0.1.4
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USER }}
+        password: ${{ secrets.SSH_PASS }}
+        port: ${{ secrets.SSH_PORT }}
+        source: "."
+        target: ${{ secrets.WORK_DIR }}
+
+  build:
+    name: Build on VPS
+    runs-on: ubuntu-latest
+    needs: deploy
+    steps:
+      - name: Copy file via ssh password
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASS }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd ${{ secrets.WORK_DIR }}
+            [ ! -f .env ] && cp .env.production .env
+            /home/rocky/.bun/bin/bun install
+            sudo /usr/bin/systemctl restart barnabe.service
+

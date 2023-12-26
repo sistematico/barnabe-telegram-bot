@@ -55,16 +55,13 @@ bower_components
 build/Release
 
 # Dependency directories
-
 node_modules/
 jspm_packages/
 
 # Snowpack dependency directory (https://snowpack.dev/)
-
 web_modules/
 
 # TypeScript cache
-
 *.tsbuildinfo
 
 # Optional npm cache directory
@@ -133,19 +130,15 @@ dist
 .vuepress/dist
 
 # vuepress v2.x temp and cache directory
-
 .temp
 
 # Docusaurus cache and generated files
-
 .docusaurus
 
 # Serverless directories
-
 .serverless/
 
 # FuseBox cache
-
 .fusebox/
 
 # DynamoDB Local files
@@ -173,3 +166,7 @@ dist
 
 # Finder (MacOS) folder config
 .DS_Store
+
+*old*
+*.mp4
+*.mp3
