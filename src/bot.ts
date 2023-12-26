@@ -50,7 +50,7 @@ bot.chatType("private").on("message:entities:url", async (ctx) => {
     return;
   } catch (error) {
     console.error(error);
-    ctx.reply("Houve um erro ao baixar o vídeo.");
+    ctx.reply("Houve um erro ao baixar o vídeo:\n\n" + JSON.stringify(error, null, 2));
   }
 });
 
