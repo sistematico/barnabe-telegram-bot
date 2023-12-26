@@ -1,9 +1,13 @@
 import { Hono } from "hono";
-import { Bot, webhookCallback, InputFile } from "grammy";
+import { Bot, Context, webhookCallback, InputFile } from "grammy";
 import { autoRetry } from "@grammyjs/auto-retry";
 import YTDlpWrap from "yt-dlp-wrap";
 import { unlink, exists } from 'fs/promises';
 import { errorHandler } from "@/mw/error"
+
+type MyContext = Context & {
+  ip: string | null;
+};
 
 const app = new Hono();
 app.use(errorHandler);
@@ -11,22 +15,40 @@ app.use(errorHandler);
 const token = Bun.env.BOT_TOKEN
 if (!token) throw new Error("Token not set");
 
-const bot = new Bot(token);
+const bot = new Bot<MyContext>(token);
 const ytdlp = new YTDlpWrap("/usr/local/bin/yt-dlp");
 
 bot.api.config.use(autoRetry({ maxRetryAttempts: 1, maxDelaySeconds: 5 }));
 
-async function downloadVideo(url: string) {
+app.use('/', async (ctx, next) => {
+  const clientIP = ctx.req.header('x-forwarded-for') || ctx.req.header('x-real-ip') || null;
+  
+  // ctx.set('clientIP', clientIP); // Armazena o IP no contexto
+
+
+  bot.use(async (ctx, next) => {
+    ctx.ip = clientIP;
+    await next();
+  });
+
+  await next();
+});
+
+
+async function downloadVideo(url: string, clientIP: string | null) {
   const videoInfo = await ytdlp.getVideoInfo(url);
   
   const title = videoInfo.title;
   const safeTitle = title.replace(/[^a-zA-Z0-9]/g, '_'); // Remove caracteres especiais
   
   const downloadPath = `${safeTitle}.mp4`;
-  // await ytdlp.exec([url, '--source-address', '-c', '--no-part', '-f', 'best[ext=mp4]', '-o', downloadPath]);
-  const download = await ytdlp.exec([url, '--source-address', '-c', '--no-part', '-f', 'b', '-o', downloadPath]);
   
-  console.log(JSON.stringify(download, null, 2))
+  if (clientIP) {
+    await ytdlp.exec([url, '--source-address', clientIP, '-c', '--no-part', '-f', 'b', '-o', downloadPath]);
+  } else {
+    await ytdlp.exec([url, '-c', '--no-part', '-f', 'b', '-o', downloadPath]);
+  }
+  // const download = await ytdlp.exec([url, '--source-address', '-c', '--no-part', '-f', 'b', '-o', downloadPath]);
 
   return downloadPath;
 }
@@ -38,7 +60,9 @@ bot.chatType("private").on("message:entities:url", async (ctx) => {
   const url = urlMatch[0];
 
   try {
-    const downloadPath = await downloadVideo(url);
+    // const downloadPath = await downloadVideo(url);
+    const clientIP = ctx.ip; // Pega o IP do cliente do contexto
+    const downloadPath = await downloadVideo(url, clientIP);
 
     if (!await exists(downloadPath)) return;
 
