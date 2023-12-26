@@ -23,8 +23,11 @@ async function downloadVideo(url: string) {
   const safeTitle = title.replace(/[^a-zA-Z0-9]/g, '_'); // Remove caracteres especiais
   
   const downloadPath = `${safeTitle}.mp4`;
-  await ytdlp.exec([url, '-c', '--no-part', '-f', 'best[ext=mp4]', '-o', downloadPath]);
+  // await ytdlp.exec([url, '--source-address', '-c', '--no-part', '-f', 'best[ext=mp4]', '-o', downloadPath]);
+  const download = await ytdlp.exec([url, '--source-address', '-c', '--no-part', '-f', 'b', '-o', downloadPath]);
   
+  console.log(JSON.stringify(download, null, 2))
+
   return downloadPath;
 }
 
