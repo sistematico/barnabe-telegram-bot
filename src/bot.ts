@@ -5,13 +5,24 @@ import YTDlpWrap from "yt-dlp-wrap";
 import { unlink, exists } from 'fs/promises';
 import { errorHandler } from "@/mw/error"
 
+const mode = Bun.env.NODE_ENV || 'development'
+
 const app = new Hono();
 app.use(errorHandler);
 
 const token = Bun.env.BOT_TOKEN
 if (!token) throw new Error("Token not set");
 
-const bot = new Bot(token);
+let bot = null
+
+if (mode === 'production') {
+  bot = new Bot(token as string, {
+    client: { apiRoot: 'http://127.0.0.1:8081' }
+  });  
+} else {
+  bot = new Bot(token);
+}
+
 const ytdlp = new YTDlpWrap("/usr/local/bin/yt-dlp");
 
 bot.api.config.use(autoRetry({ maxRetryAttempts: 1, maxDelaySeconds: 5 }));
@@ -23,8 +34,6 @@ async function downloadVideo(url: string) {
   const safeTitle = title.replace(/[^a-zA-Z0-9]/g, '_'); // Remove caracteres especiais
   
   const downloadPath = `${safeTitle}.mp4`;  
-  // const download = await ytdlp.exec([url, '--source-address', '-c', '--no-part', '-f', 'b', '-o', downloadPath]);
-  // await ytdlp.exec([url, '-c', '-w', '--source-address', clientIP, '--no-part', '-f', 'b', '-o', downloadPath]);
   await ytdlp.exec([url, '-c', '-w', '--no-part', '-f', 'b', '-o', downloadPath]);
 
   return downloadPath;
