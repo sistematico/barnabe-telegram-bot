@@ -1,31 +1,17 @@
-import { Hono } from "hono";
-import { Bot, Context, webhookCallback, InputFile } from "grammy";
-import { autoRetry } from "@grammyjs/auto-retry";
+import { Bot, InputFile } from "grammy";
+import { run } from "@grammyjs/runner";
 import YTDlpWrap from "yt-dlp-wrap";
-import { unlink, exists } from 'fs/promises';
-import { errorHandler } from "@/mw/error"
-
-const mode = Bun.env.NODE_ENV || 'development'
-
-const app = new Hono();
-app.use(errorHandler);
+import { unlink } from 'fs/promises';
 
 const token = Bun.env.BOT_TOKEN
 if (!token) throw new Error("Token not set");
 
-let bot = null
+const apiRoot = Bun.env.BOT_API_ROOT || 'http://127.0.0.1:8081'
 
-if (mode === 'production') {
-  bot = new Bot(token as string, {
-    client: { apiRoot: 'http://127.0.0.1:8081' }
-  });  
-} else {
-  bot = new Bot(token);
-}
-
+const bot = new Bot(token as string, { client: { apiRoot } });  
 const ytdlp = new YTDlpWrap("/usr/local/bin/yt-dlp");
 
-bot.api.config.use(autoRetry({ maxRetryAttempts: 1, maxDelaySeconds: 5 }));
+// bot.api.config.use(autoRetry({ maxRetryAttempts: 1, maxDelaySeconds: 5 }));
 
 async function downloadVideo(url: string) {
   const videoInfo = await ytdlp.getVideoInfo(url);
@@ -47,9 +33,9 @@ bot.chatType("private").on("message:entities:url", async (ctx) => {
 
   try {
     const downloadPath = await downloadVideo(url);
-    const fileExists = await exists(downloadPath);
+    const file = Bun.file(downloadPath);
 
-    if (!fileExists) {
+    if (!await file.exists()) {
       ctx.reply("Houve um erro ao baixar o vídeo(código: 0975)");
       return;
     }
@@ -66,19 +52,9 @@ bot.chatType("private").on("message:entities:url", async (ctx) => {
   }
 });
 
-if (Bun.env.NODE_ENV === "production") {
-  const webhookUrl = Bun.env.BOT_WEBHOOK_URL;
-  if (!webhookUrl) throw new Error("BOT_WEBHOOK_URL is required for production mode");
-
-  bot.api.setWebhook(webhookUrl);
-  app.use(webhookCallback(bot, "hono"));
-} else {
-  bot.catch((err) => {
-    const ctx = err.ctx;
-    console.error(`Erro ao processar update ${ctx.update.update_id}:`, err.error);
-  });
+bot.catch((err) => {
+  const ctx = err.ctx;
+  console.error(`Erro ao processar update ${ctx.update.update_id}:`, err.error);
+});
   
-  bot.start();
-}
-
-export default { port: 3008, fetch: app.fetch };
+run(bot);
