@@ -26,6 +26,8 @@ async function downloadVideo(url: string) {
 }
 
 bot.chatType("private").on("message:entities:url", async (ctx) => {
+  console.log(JSON.stringify(ctx, null, 2))
+
   const urlMatch = ctx.message?.text.match(/(https?:\/\/[^\s]+)/);
   if (!urlMatch) return;
 
@@ -42,13 +44,14 @@ bot.chatType("private").on("message:entities:url", async (ctx) => {
 
     const video = new InputFile(downloadPath);
     await ctx.replyWithVideo(video);
+    // await bot.api.sendVideo(12345, video, { caption: "photo.jpg" });
 
     await unlink(downloadPath);
 
     return;
   } catch (error) {
     console.error(error);
-    ctx.reply("Houve um erro ao baixar o vídeo:\n\n" + JSON.stringify(error, null, 2));
+    ctx.reply("Houve um erro ao baixar o vídeo:\n" + JSON.stringify(error, null, 2));
   }
 });
 
