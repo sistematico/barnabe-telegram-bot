@@ -62,8 +62,6 @@ RestartSec=5s
 WantedBy=multi-user.target 
 ```
 
-
-
 ### Telegram Bot API
 
 Este bot necessita de um uma API própria para o Telegram, pois os limites são mais altos.
@@ -88,6 +86,43 @@ RestartSec=10s
 [Install]
 WantedBy=multi-user.target
 ```
+
+### WebApp
+
+Configuração do Nginx:
+
+```
+server {
+    listen 80;
+    listen [::]:80;
+    server_name barna.paxa.dev;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+
+    ssl_certificate         /etc/letsencrypt/live/barna.paxa.dev/fullchain.pem;
+    ssl_certificate_key     /etc/letsencrypt/live/barna.paxa.dev/privkey.pem;
+
+    server_name barna.paxa.dev;
+    root /home/rocky/barnabe/webapp;
+
+    location /webapp {}
+
+    location / { 
+      proxy_pass http://127.0.0.1:3008;
+      proxy_http_version 1.1;  
+      proxy_set_header Upgrade $http_upgrade;  
+      proxy_set_header Connection 'upgrade';  
+      proxy_set_header Host $host;  
+      proxy_cache_bypass $http_upgrade;  
+    } 
+}
+```
+
+> Saiba mais em: [Telegram Webapps](https://core.telegram.org/bots/webapps)
 
 ## 💡 Dicas
 

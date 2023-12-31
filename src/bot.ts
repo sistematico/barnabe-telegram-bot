@@ -36,8 +36,9 @@ bot.chatType("private").on("message:entities:url", async (ctx) => {
   try {
     const downloadPath = await downloadVideo(url);
     const file = Bun.file(downloadPath);
+    const fileExists = await file.exists();
 
-    if (!await file.exists()) {
+    if (!fileExists) {
       ctx.reply("Houve um erro ao baixar o vídeo(código: 0975)");
       return;
     }
