@@ -2,7 +2,7 @@
 
 <!--suppress HtmlDeprecatedAttribute -->
 <div align="center">
-    <img src="./assets/macunaima2.jpg" alt="Macunaíma" />
+    <img src="./assets/barnabe.jpg" alt="Barnabé" />
 </div>
 
 Um "bot" para baixar vídeos de diversos sites usando o [Telegram](https://telegram.org).
